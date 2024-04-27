@@ -50,7 +50,7 @@ public class User extends TimestampAudit {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="gendder")
+    @Column(name="gender")
     private EGender gender;
 
     @Enumerated(EnumType.STRING)

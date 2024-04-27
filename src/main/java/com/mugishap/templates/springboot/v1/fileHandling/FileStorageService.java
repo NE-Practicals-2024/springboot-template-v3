@@ -46,7 +46,8 @@ public class FileStorageService {
 
             Path path = Paths.get(directory);
 
-            Files.copy(file.getInputStream(), path.resolve(Objects.requireNonNull(filename)));
+            Files.copy(file.getInputStream(), path.resolve(Objects.requireNonNull(filename.replaceAll(" ", "_"))));
+            filename = filename.replaceAll(" ", "_");
             return path.toString() + "/" + filename;
         } catch (Exception e) {
             System.out.println(e);
@@ -72,6 +73,13 @@ public class FileStorageService {
         }
     }
 
+    public void removeFileOnDisk(String filePath) {
+        try {
+            FileSystemUtils.deleteRecursively(Paths.get(filePath));
+        } catch (IOException e) {
+            throw new AppException(e.getMessage());
+        }
+    }
 
     public void deleteAll() {
         FileSystemUtils.deleteRecursively(Paths.get(root).toFile());

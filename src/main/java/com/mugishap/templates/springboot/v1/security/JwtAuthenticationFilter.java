@@ -29,9 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        try{
+        try {
             String jwt = getJwtFromRequest(httpServletRequest);
-            if(StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)){
+            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String userID = tokenProvider.getUserIdFromToken(jwt);
                 UserDetails userDetails = customUserDetailsService.loadByUserId(UUID.fromString(userID));
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -40,14 +40,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
-        }catch (Exception e){
-            logger.error("Could not set user authentication in security context",e);
+        } catch (Exception e) {
+            logger.error("Could not set user authentication in security context", e);
         }
-        filterChain.doFilter(httpServletRequest,httpServletResponse);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
+        System.out.println(bearerToken);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7, bearerToken.length());
         }

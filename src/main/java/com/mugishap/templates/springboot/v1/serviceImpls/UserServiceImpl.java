@@ -1,14 +1,16 @@
 package com.mugishap.templates.springboot.v1.serviceImpls;
 
-import com.mugishap.templates.springboot.v1.fileHandling.File;
 import com.mugishap.templates.springboot.v1.enums.ERole;
 import com.mugishap.templates.springboot.v1.enums.EUserStatus;
 import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.exceptions.ResourceNotFoundException;
+import com.mugishap.templates.springboot.v1.fileHandling.File;
+import com.mugishap.templates.springboot.v1.fileHandling.FileStorageService;
 import com.mugishap.templates.springboot.v1.models.User;
 import com.mugishap.templates.springboot.v1.repositories.IUserRepository;
+import com.mugishap.templates.springboot.v1.services.IFileService;
 import com.mugishap.templates.springboot.v1.services.IUserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,14 +23,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
 
     private final IUserRepository userRepository;
-
-    @Autowired
-    public UserServiceImpl(IUserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final IFileService fileService;
+    private final FileStorageService fileStorageService;
 
     @Override
     public List<User> getAll() {
@@ -58,7 +58,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public User update(UUID id, User user) {
         User entity = this.userRepository.findById(id).orElseThrow(
-                () ->  new ResourceNotFoundException("User", "id", id.toString()));
+                () -> new ResourceNotFoundException("User", "id", id.toString()));
 
         Optional<User> userOptional = this.userRepository.findByEmail(user.getEmail());
         if (userOptional.isPresent() && (userOptional.get().getId() != entity.getId()))
@@ -108,9 +108,9 @@ public class UserServiceImpl implements IUserService {
         String email;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if(principal instanceof UserDetails){
+        if (principal instanceof UserDetails) {
             email = ((UserDetails) principal).getUsername();
-        }else{
+        } else {
             email = principal.toString();
         }
 
@@ -125,24 +125,38 @@ public class UserServiceImpl implements IUserService {
     }
 
 
-
     @Override
     public User changeStatus(UUID id, EUserStatus status) {
         User entity = this.userRepository.findById(id).orElseThrow(
-                () ->  new ResourceNotFoundException("User", "id", id.toString()));
+                () -> new ResourceNotFoundException("User", "id", id.toString()));
 
         entity.setStatus(status);
 
-        return  this.userRepository.save(entity);
+        return this.userRepository.save(entity);
     }
 
     @Override
     public User changeProfileImage(UUID id, File file) {
         User entity = this.userRepository.findById(id).orElseThrow(
-                () ->  new ResourceNotFoundException("Document", "id", id.toString()));
-
+                () -> new ResourceNotFoundException("Document", "id", id.toString()));
+        File existingFile = entity.getProfileImage();
+        if (existingFile != null) {
+            this.fileStorageService.removeFileOnDisk(existingFile.getPath());
+        }
         entity.setProfileImage(file);
-        return  this.userRepository.save(entity);
+        return this.userRepository.save(entity);
 
+    }
+
+    @Override
+    public User removeProfileImage(UUID id) {
+        User user = this.userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("User", "id", id.toString()));
+        File file = user.getProfileImage();
+        if (file != null) {
+            this.fileService.delete(file.getId());
+        }
+        user.setProfileImage(null);
+        return this.userRepository.save(user);
     }
 }

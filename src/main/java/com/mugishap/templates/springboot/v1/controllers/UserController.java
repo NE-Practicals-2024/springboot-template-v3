@@ -7,10 +7,11 @@ import com.mugishap.templates.springboot.v1.models.Role;
 import com.mugishap.templates.springboot.v1.models.User;
 import com.mugishap.templates.springboot.v1.payload.ApiResponse;
 import com.mugishap.templates.springboot.v1.repositories.IRoleRepository;
-import com.mugishap.templates.springboot.v1.security.JwtTokenProvider;
 import com.mugishap.templates.springboot.v1.services.IFileService;
 import com.mugishap.templates.springboot.v1.services.IUserService;
 import com.mugishap.templates.springboot.v1.utils.Constants;
+import com.mugishap.templates.springboot.v1.utils.Mapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,11 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +35,6 @@ public class UserController {
     private final IUserService userService;
     private static final ModelMapper modelMapper = new ModelMapper();
     private final IRoleRepository roleRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final IFileService fileService;
 
     @Value("${uploads.directory.user_profiles}")
@@ -70,7 +68,7 @@ public class UserController {
 
         User user = new User();
 
-        String encodedPassword = bCryptPasswordEncoder.encode(dto.getPassword());
+        String encodedPassword = Mapper.encode(dto.getPassword());
         Role role = roleRepository.findByName(dto.getRole()).orElseThrow(
                 () -> new BadRequestException("User Role not set"));
 
@@ -98,6 +96,13 @@ public class UserController {
 
         return ResponseEntity.ok(new ApiResponse(true, "File saved successfully", updated));
 
+    }
+
+    @PatchMapping(path = "/remove-profile")
+    public ResponseEntity<ApiResponse> removeProfileImage() {
+        User user = this.userService.getLoggedInUser();
+        User updated = this.userService.removeProfileImage(user.getId());
+        return ResponseEntity.ok(new ApiResponse(true, "Profile image removed successfully", updated));
     }
 
     private User convertDTO(SignUpDTO dto) {

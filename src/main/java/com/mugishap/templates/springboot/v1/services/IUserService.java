@@ -42,4 +42,7 @@ public interface IUserService {
 
     public User changeProfileImage(UUID id, File file);
 
+    public User removeProfileImage(UUID id);
+
+
 }

@@ -2,6 +2,7 @@ package com.mugishap.templates.springboot.v1.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mugishap.templates.springboot.v1.enums.EGender;
+import com.mugishap.templates.springboot.v1.enums.EUserStatus;
 import com.mugishap.templates.springboot.v1.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,13 +28,14 @@ public class UserPrincipal implements UserDetails {
 
     private String lastName;
 
-    private EGender gender;
-
     private String mobile;
+
+    private EGender gender;
 
     @JsonIgnore
     private String password;
 
+    private EUserStatus status;
 
     private Collection<? extends GrantedAuthority> authorities;
 
@@ -46,9 +48,10 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getGender(),
                 user.getMobile(),
+                user.getGender(),
                 user.getPassword(),
+                user.getStatus(),
                 authorities);
     }
 
