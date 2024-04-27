@@ -44,13 +44,8 @@ public class WebSecurity {
                                 "/api/v1/users/**"
                         ).permitAll()
                         .requestMatchers(
-                                "/v2/api-docs",
-                                "/configuration/ui",
-                                "/swagger-resources/**",
-                                "/load-file/**",
-                                "/configuration/security",
-                                "/swagger-ui/index.html",
-                                "/webjars/**"
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**"
                         ).permitAll()
                         .anyRequest().authenticated()
         ).sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
