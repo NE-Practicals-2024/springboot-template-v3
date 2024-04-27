@@ -1,11 +1,13 @@
 package com.mugishap.templates.springboot.v1.controllers;
 
-import com.mugishap.templates.springboot.v1.dtos.SignUpDTO;
+import com.mugishap.templates.springboot.v1.payload.request.CreateUserDTO;
+import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
+import com.mugishap.templates.springboot.v1.enums.ERole;
 import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.fileHandling.File;
 import com.mugishap.templates.springboot.v1.models.Role;
 import com.mugishap.templates.springboot.v1.models.User;
-import com.mugishap.templates.springboot.v1.payload.ApiResponse;
+import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;
 import com.mugishap.templates.springboot.v1.repositories.IRoleRepository;
 import com.mugishap.templates.springboot.v1.services.IFileService;
 import com.mugishap.templates.springboot.v1.services.IUserService;
@@ -19,12 +21,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -45,17 +47,39 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Currently logged in user fetched", userService.getLoggedInUser()));
     }
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return this.userService.getAll();
+    @PutMapping(path = "/update")
+    public ResponseEntity<ApiResponse> update(@RequestBody UpdateUserDTO dto) {
+        User updated = this.userService.update(this.userService.getLoggedInUser().getId(), dto);
+        return ResponseEntity.ok(ApiResponse.success("User updated successfully", updated));
     }
 
-    @GetMapping(path = "/paginated")
-    public Page<User> getAllUsers(@RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
-                                  @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit
+    @GetMapping(path = "/all")
+    public Page<User> getAllUsers(
+            @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit
     ) {
         Pageable pageable = (Pageable) PageRequest.of(page, limit, Sort.Direction.ASC, "id");
         return userService.getAll(pageable);
+    }
+
+    @GetMapping(path = "/all/{role}")
+    public Page<User> getAllUsersByRole(
+            @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit,
+            @PathVariable(value = "role") ERole role
+    ) {
+        Pageable pageable = (Pageable) PageRequest.of(page, limit, Sort.Direction.ASC, "id");
+        return userService.getAllByRole(pageable, role);
+    }
+
+    @GetMapping(path = "/search")
+    public Page<User> searchUsers(
+            @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit,
+            @RequestParam(value = "searchKey") String searchKey
+    ) {
+        Pageable pageable = (Pageable) PageRequest.of(page, limit, Sort.Direction.ASC, "id");
+        return userService.searchUser(pageable, searchKey);
     }
 
     @GetMapping(path = "/{id}")
@@ -64,7 +88,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<ApiResponse> register(@RequestBody @Valid SignUpDTO dto) {
+    public ResponseEntity<ApiResponse> register(@RequestBody @Valid CreateUserDTO dto) {
 
         User user = new User();
 
@@ -85,7 +109,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("User created successfully", entity));
     }
 
-    @PutMapping(path = "/upload-profile")
+    @PutMapping(path = "/upload-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse> uploadProfileImage(
             @RequestParam("file") MultipartFile document
     ) {
@@ -105,7 +129,22 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse(true, "Profile image removed successfully", updated));
     }
 
-    private User convertDTO(SignUpDTO dto) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse> deleteMyAccount() {
+        User user = this.userService.getLoggedInUser();
+        this.userService.delete(user.getId());
+        return ResponseEntity.ok(ApiResponse.success("Account deleted successfully"));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ApiResponse> deleteByAdmin(
+            @PathVariable(value = "id") UUID id
+    ) {
+        this.userService.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("Account deleted successfully"));
+    }
+
+    private User convertDTO(CreateUserDTO dto) {
         return modelMapper.map(dto, User.class);
     }
 }

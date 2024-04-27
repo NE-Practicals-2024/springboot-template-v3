@@ -1,4 +1,4 @@
-package com.mugishap.templates.springboot.v1.payload;
+package com.mugishap.templates.springboot.v1.payload.response;
 
 
 import lombok.AllArgsConstructor;

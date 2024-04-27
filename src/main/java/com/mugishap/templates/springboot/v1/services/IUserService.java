@@ -1,20 +1,17 @@
 package com.mugishap.templates.springboot.v1.services;
 
-import com.mugishap.templates.springboot.v1.fileHandling.File;
+import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
 import com.mugishap.templates.springboot.v1.enums.ERole;
 import com.mugishap.templates.springboot.v1.enums.EUserStatus;
+import com.mugishap.templates.springboot.v1.fileHandling.File;
 import com.mugishap.templates.springboot.v1.models.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-
-import java.util.List;
 import java.util.UUID;
 
 
 public interface IUserService {
-
-    public List<User> getAll();
 
     public Page<User> getAll(Pageable pageable);
 
@@ -22,15 +19,11 @@ public interface IUserService {
 
     public User create(User user);
 
-    public User update(UUID id, User user);
+    public User update(UUID id, UpdateUserDTO dto);
 
     public boolean delete(UUID id);
 
-    public List<User> getAllByRole(ERole role);
-
     public Page<User> getAllByRole(Pageable pageable, ERole role);
-
-    public List<User> searchUser(String searchKey);
 
     public Page<User> searchUser(Pageable pageable, String searchKey);
 
@@ -43,6 +36,5 @@ public interface IUserService {
     public User changeProfileImage(UUID id, File file);
 
     public User removeProfileImage(UUID id);
-
 
 }

@@ -60,13 +60,11 @@ public class FileServiceImpl implements IFileService {
     public File create(MultipartFile document, String directory) {
         File file = new File();
         file.setStatus(EFileStatus.PENDING);
-
-
         String fileName = FileUtil.generateUUID(Objects.requireNonNull(document.getOriginalFilename()));
         String documentSizeType = FileUtil.getFileSizeTypeFromFileSize(file.getSize());
         int documentSize = FileUtil.getFormattedFileSizeFromFileSize(file.getSize(), EFileSizeType.valueOf(documentSizeType));
 
-        file.setName(fileName);
+        file.setName(fileName.replaceAll(" ", "_"));
         file.setPath(fileStorageService.save(document, directory, fileName));
         file.setStatus(EFileStatus.SAVED);
         file.setType(document.getContentType());
@@ -81,6 +79,7 @@ public class FileServiceImpl implements IFileService {
         boolean exists = this.fileRepository.existsById(id);
         if (!exists)
             throw new ResourceNotFoundException("File", "id", id.toString());
+        this.fileStorageService.removeFileOnDisk(this.getById(id).getPath());
         this.fileRepository.deleteById(id);
         return true;
     }
@@ -94,12 +93,8 @@ public class FileServiceImpl implements IFileService {
     public File uploadFile(MultipartFile file, String directory, UUID appointeeID) throws InvalidFileException, IOException {
         String fileName = handleFileName(Objects.requireNonNull(file.getOriginalFilename()), appointeeID);
         Path path = Paths.get(directory, fileName);
-        System.out.println(path.toString());
         Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-
         String extension = getFileExtension(fileName);
-
-
         assert extension != null;
         String fileBaseName = fileName.substring(
                 0,

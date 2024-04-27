@@ -1,7 +1,7 @@
 package com.mugishap.templates.springboot.v1.exceptions;
 
 
-import com.mugishap.templates.springboot.v1.payload.ErrorResponse;
+import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,20 +15,20 @@ import java.util.Objects;
 public class AppFailureException {
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleAnyError(RuntimeException exception) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage(), exception));
+    public ResponseEntity<ApiResponse> handleAnyError(RuntimeException exception) {
+        return ResponseEntity.badRequest().body(ApiResponse.error(exception.getMessage(), exception));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidations(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ApiResponse> handleValidations(MethodArgumentNotValidException exception) {
         FieldError error = Objects.requireNonNull(exception.getFieldError());
         String message = error.getField() + ": " + error.getDefaultMessage();
-        return ResponseEntity.badRequest().body(new ErrorResponse(message, error));
+        return ResponseEntity.badRequest().body(ApiResponse.error(message, error));
     }
 
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleSqlExceptions(ConstraintViolationException exception) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage() + " - " + exception.getSQL() + " - " + exception.getSQLState(), exception.getSQLException()));
+    public ResponseEntity<ApiResponse> handleSqlExceptions(ConstraintViolationException exception) {
+        return ResponseEntity.badRequest().body(ApiResponse.error(exception.getMessage() + " - " + exception.getSQL() + " - " + exception.getSQLState(), exception.getSQLException()));
     }
 }

@@ -1,5 +1,6 @@
 package com.mugishap.templates.springboot.v1.serviceImpls;
 
+import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
 import com.mugishap.templates.springboot.v1.enums.ERole;
 import com.mugishap.templates.springboot.v1.enums.EUserStatus;
 import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
@@ -13,12 +14,10 @@ import com.mugishap.templates.springboot.v1.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,11 +28,6 @@ public class UserServiceImpl implements IUserService {
     private final IUserRepository userRepository;
     private final IFileService fileService;
     private final FileStorageService fileStorageService;
-
-    @Override
-    public List<User> getAll() {
-        return this.userRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
-    }
 
     @Override
     public Page<User> getAll(Pageable pageable) {
@@ -56,19 +50,19 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public User update(UUID id, User user) {
+    public User update(UUID id, UpdateUserDTO dto) {
         User entity = this.userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("User", "id", id.toString()));
 
-        Optional<User> userOptional = this.userRepository.findByEmail(user.getEmail());
+        Optional<User> userOptional = this.userRepository.findByEmail(dto.getEmail());
         if (userOptional.isPresent() && (userOptional.get().getId() != entity.getId()))
             throw new BadRequestException(String.format("User with email '%s' already exists", entity.getEmail()));
 
-        entity.setEmail(user.getEmail());
-        entity.setFirstName(user.getFirstName());
-        entity.setLastName(user.getLastName());
-        entity.setMobile(user.getMobile());
-        entity.setGender(user.getGender());
+        entity.setEmail(dto.getEmail());
+        entity.setFirstName(dto.getFirstName());
+        entity.setLastName(dto.getLastName());
+        entity.setMobile(dto.getMobile());
+        entity.setGender(dto.getGender());
 
 
         return this.userRepository.save(entity);
@@ -84,18 +78,8 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public List<User> getAllByRole(ERole role) {
-        return this.userRepository.findByRoles(role);
-    }
-
-    @Override
     public Page<User> getAllByRole(Pageable pageable, ERole role) {
         return this.userRepository.findByRoles(pageable, role);
-    }
-
-    @Override
-    public List<User> searchUser(String searchKey) {
-        return this.userRepository.searchUser(searchKey);
     }
 
     @Override

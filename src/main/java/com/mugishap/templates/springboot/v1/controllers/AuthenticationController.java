@@ -1,14 +1,14 @@
 package com.mugishap.templates.springboot.v1.controllers;
 
 import com.mugishap.templates.springboot.v1.services.MailService;
-import com.mugishap.templates.springboot.v1.dtos.InitiatePasswordDTO;
-import com.mugishap.templates.springboot.v1.dtos.ResetPasswordDTO;
-import com.mugishap.templates.springboot.v1.dtos.SignInDTO;
+import com.mugishap.templates.springboot.v1.payload.request.InitiatePasswordResetDTO;
+import com.mugishap.templates.springboot.v1.payload.request.ResetPasswordDTO;
+import com.mugishap.templates.springboot.v1.payload.request.LoginDTO;
 import com.mugishap.templates.springboot.v1.enums.EUserStatus;
 import com.mugishap.templates.springboot.v1.exceptions.AppException;
 import com.mugishap.templates.springboot.v1.models.User;
-import com.mugishap.templates.springboot.v1.payload.ApiResponse;
-import com.mugishap.templates.springboot.v1.payload.JwtAuthenticationResponse;
+import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;
+import com.mugishap.templates.springboot.v1.payload.response.JwtAuthenticationResponse;
 import com.mugishap.templates.springboot.v1.security.JwtTokenProvider;
 import com.mugishap.templates.springboot.v1.services.IUserService;
 import com.mugishap.templates.springboot.v1.utils.Utility;
@@ -48,8 +48,8 @@ public class AuthenticationController {
     }
 
 
-    @PostMapping(path = "/signin")
-    public ResponseEntity<ApiResponse> signin(@Valid @RequestBody SignInDTO dto) {
+    @PostMapping(path = "/login")
+    public ResponseEntity<ApiResponse> signin(@Valid @RequestBody LoginDTO dto) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
@@ -68,7 +68,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(path = "/initiate-reset-password")
-    public ResponseEntity<ApiResponse> initiateResetPassword(@RequestBody @Valid InitiatePasswordDTO dto) {
+    public ResponseEntity<ApiResponse> initiateResetPassword(@RequestBody @Valid InitiatePasswordResetDTO dto) {
         User user = this.userService.getByEmail(dto.getEmail());
         user.setActivationCode(Utility.randomUUID(6, 0, 'N'));
         user.setStatus(EUserStatus.RESET);

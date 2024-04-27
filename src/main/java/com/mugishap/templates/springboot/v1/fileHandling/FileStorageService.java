@@ -43,9 +43,7 @@ public class FileStorageService {
 
     public String save(MultipartFile file, String directory, String filename) {
         try {
-
             Path path = Paths.get(directory);
-
             Files.copy(file.getInputStream(), path.resolve(Objects.requireNonNull(filename.replaceAll(" ", "_"))));
             filename = filename.replaceAll(" ", "_");
             return path.toString() + "/" + filename;

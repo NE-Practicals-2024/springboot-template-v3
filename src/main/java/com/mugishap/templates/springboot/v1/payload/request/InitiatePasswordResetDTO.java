@@ -1,4 +1,4 @@
-package com.mugishap.templates.springboot.v1.dtos;
+package com.mugishap.templates.springboot.v1.payload.request;
 
 import lombok.Getter;
 
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 @Getter
-public class InitiatePasswordDTO {
+public class InitiatePasswordResetDTO {
 
     @NotBlank
     @Email

@@ -1,4 +1,4 @@
-package com.mugishap.templates.springboot.v1.dtos;
+package com.mugishap.templates.springboot.v1.payload.request;
 
 
 import com.mugishap.templates.springboot.v1.enums.ERole;
@@ -11,7 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 @Getter
-public class SignUpDTO {
+public class CreateUserDTO {
 
     @Email
     private  String email;
@@ -27,6 +27,7 @@ public class SignUpDTO {
     private  String mobile;
 
     private EGender gender;
+
 
     private ERole role;
 

@@ -1,4 +1,4 @@
-package com.mugishap.templates.springboot.v1.dtos;
+package com.mugishap.templates.springboot.v1.payload.request;
 
 import com.mugishap.templates.springboot.v1.enums.EGender;
 import lombok.Getter;

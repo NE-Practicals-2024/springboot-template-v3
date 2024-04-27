@@ -53,7 +53,7 @@ public class File extends InitiatorAudit {
 
 
     public String getUrl() {
-        return "http://localhost:8080/api/v1/files/load-file" + "/" + this.getName();
+        return "http://localhost:8086/api/v1/files/load-file" + "/" + this.getName();
     }
 }
 
