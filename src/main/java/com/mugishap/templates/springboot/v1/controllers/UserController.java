@@ -1,21 +1,19 @@
 package com.mugishap.templates.springboot.v1.controllers;
 
-import com.mugishap.templates.springboot.v1.payload.request.CreateUserDTO;
-import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
 import com.mugishap.templates.springboot.v1.enums.ERole;
 import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.models.File;
 import com.mugishap.templates.springboot.v1.models.Role;
 import com.mugishap.templates.springboot.v1.models.User;
+import com.mugishap.templates.springboot.v1.payload.request.CreateUserDTO;
+import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
 import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;
 import com.mugishap.templates.springboot.v1.repositories.IRoleRepository;
 import com.mugishap.templates.springboot.v1.services.IFileService;
 import com.mugishap.templates.springboot.v1.services.IUserService;
 import com.mugishap.templates.springboot.v1.utils.Constants;
-import com.mugishap.templates.springboot.v1.utils.Mapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,12 +34,13 @@ import java.util.UUID;
 public class UserController {
 
     private final IUserService userService;
-    private static final ModelMapper modelMapper = new ModelMapper();
+    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     private final IRoleRepository roleRepository;
     private final IFileService fileService;
 
     @Value("${uploads.directory.user_profiles}")
-    private String directory;
+    private String userProfilesDirectory;
 
     @GetMapping(path = "/current-user")
     public ResponseEntity<ApiResponse> currentlyLoggedInUser() {
@@ -92,7 +92,7 @@ public class UserController {
 
         User user = new User();
 
-        String encodedPassword = Mapper.encode(dto.getPassword());
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
         Role role = roleRepository.findByName(dto.getRole()).orElseThrow(
                 () -> new BadRequestException("User Role not set"));
 
@@ -114,11 +114,11 @@ public class UserController {
             @RequestParam("file") MultipartFile document
     ) {
         User user = this.userService.getLoggedInUser();
-        File file = this.fileService.create(document, directory);
+        File file = this.fileService.create(document, userProfilesDirectory);
 
         User updated = this.userService.changeProfileImage(user.getId(), file);
 
-        return ResponseEntity.ok(new ApiResponse(true, "File saved successfully", updated));
+        return ResponseEntity.ok(ApiResponse.success("File saved successfully", updated));
 
     }
 
@@ -126,7 +126,7 @@ public class UserController {
     public ResponseEntity<ApiResponse> removeProfileImage() {
         User user = this.userService.getLoggedInUser();
         User updated = this.userService.removeProfileImage(user.getId());
-        return ResponseEntity.ok(new ApiResponse(true, "Profile image removed successfully", updated));
+        return ResponseEntity.ok(ApiResponse.success("Profile image removed successfully", updated));
     }
 
     @DeleteMapping("/delete")
@@ -144,7 +144,4 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Account deleted successfully"));
     }
 
-    private User convertDTO(CreateUserDTO dto) {
-        return modelMapper.map(dto, User.class);
-    }
 }

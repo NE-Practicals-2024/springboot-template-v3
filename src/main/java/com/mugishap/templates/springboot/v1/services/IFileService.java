@@ -13,19 +13,11 @@ import java.util.UUID;
 
 public interface IFileService {
 
-        public List<File> getAll();
-
-        public Page<File> getAll(Pageable pageable);
-
         public File getById(UUID id);
 
         public File create(MultipartFile document, String directory);
 
         public boolean delete(UUID id);
-
-        public Page<File> getAllByStatus(Pageable pageable, EFileStatus status);
-
-        public File uploadFile(MultipartFile file, String directory, UUID appointeeID) throws InvalidFileException, IOException;
 
         public String getFileExtension(String fileName);
 

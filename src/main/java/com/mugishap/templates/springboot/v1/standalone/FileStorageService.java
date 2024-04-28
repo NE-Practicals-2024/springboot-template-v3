@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -30,6 +31,7 @@ public class FileStorageService {
     @Value("${uploads.directory.docs}")
     private String docsFolder;
 
+
     @Bean
     public void init() {
         try {
@@ -42,8 +44,7 @@ public class FileStorageService {
     public String save(MultipartFile file, String directory, String filename) {
         try {
             Path path = Paths.get(directory);
-            Files.copy(file.getInputStream(), path.resolve(Objects.requireNonNull(filename.replaceAll(" ", "_"))));
-            filename = filename.replaceAll(" ", "_");
+            Files.copy(file.getInputStream(), path.resolve(Objects.requireNonNull(filename)));
             return path.toString() + "/" + filename;
         } catch (Exception e) {
             System.out.println(e);

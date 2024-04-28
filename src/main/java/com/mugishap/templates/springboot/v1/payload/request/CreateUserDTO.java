@@ -2,16 +2,17 @@ package com.mugishap.templates.springboot.v1.payload.request;
 
 
 import com.mugishap.templates.springboot.v1.enums.ERole;
-import com.mugishap.templates.springboot.v1.validations.ValidEnum;
-import com.mugishap.templates.springboot.v1.validations.ValidPassword;
+import com.mugishap.templates.springboot.v1.validators.ValidEnum;
+import com.mugishap.templates.springboot.v1.validators.ValidPassword;
 import com.mugishap.templates.springboot.v1.enums.EGender;
+import lombok.Data;
 import lombok.Getter;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-@Getter
+@Data
 public class CreateUserDTO {
 
     @Email

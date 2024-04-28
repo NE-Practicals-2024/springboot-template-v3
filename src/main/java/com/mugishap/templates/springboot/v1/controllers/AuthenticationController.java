@@ -1,5 +1,6 @@
 package com.mugishap.templates.springboot.v1.controllers;
 
+import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.standalone.MailService;
 import com.mugishap.templates.springboot.v1.payload.request.InitiatePasswordResetDTO;
 import com.mugishap.templates.springboot.v1.payload.request.ResetPasswordDTO;
@@ -92,8 +93,8 @@ public class AuthenticationController {
             user.setStatus(EUserStatus.ACTIVE);
             this.userService.create(user);
         } else {
-            throw new AppException("Invalid code or account status");
+            throw new BadRequestException("Invalid code or account status");
         }
-        return ResponseEntity.ok(new ApiResponse(true, "Password successfully reset"));
+        return ResponseEntity.ok(ApiResponse.success("Password successfully reset"));
     }
 }

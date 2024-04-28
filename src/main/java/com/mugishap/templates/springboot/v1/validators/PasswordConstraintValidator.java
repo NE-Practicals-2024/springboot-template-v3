@@ -1,4 +1,4 @@
-package com.mugishap.templates.springboot.v1.validations;
+package com.mugishap.templates.springboot.v1.validators;
 
 
 import com.google.common.base.Joiner;

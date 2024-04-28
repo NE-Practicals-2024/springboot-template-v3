@@ -1,5 +1,7 @@
 package com.mugishap.templates.springboot.v1.serviceImpls;
 
+import com.mugishap.templates.springboot.v1.exceptions.AppException;
+import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.models.File;
 import com.mugishap.templates.springboot.v1.standalone.FileStorageService;
 import com.mugishap.templates.springboot.v1.repositories.IFileRepository;
@@ -41,16 +43,6 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public List<File> getAll() {
-        return this.fileRepository.findAll();
-    }
-
-    @Override
-    public Page<File> getAll(Pageable pageable) {
-        return this.fileRepository.findAll(pageable);
-    }
-
-    @Override
     public File getById(UUID id) {
         return this.fileRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("File", "id", id.toString()));
@@ -61,15 +53,16 @@ public class FileServiceImpl implements IFileService {
         File file = new File();
         file.setStatus(EFileStatus.PENDING);
         String fileName = FileUtil.generateUUID(Objects.requireNonNull(document.getOriginalFilename()));
-        String documentSizeType = FileUtil.getFileSizeTypeFromFileSize(file.getSize());
-        int documentSize = FileUtil.getFormattedFileSizeFromFileSize(file.getSize(), EFileSizeType.valueOf(documentSizeType));
+        String updatedFileName = this.handleFileName(fileName, UUID.randomUUID());
+        EFileSizeType sizeType = FileUtil.getFileSizeTypeFromFileSize(file.getSize());
+        int size = FileUtil.getFormattedFileSizeFromFileSize(document.getSize(), sizeType);
 
-        file.setName(fileName.replaceAll(" ", "_"));
-        file.setPath(fileStorageService.save(document, directory, fileName));
+        file.setName(updatedFileName);
+        file.setPath(fileStorageService.save(document, directory, updatedFileName));
         file.setStatus(EFileStatus.SAVED);
         file.setType(document.getContentType());
-        file.setSize(documentSize);
-        file.setSizeType(EFileSizeType.valueOf(documentSizeType));
+        file.setSize(size);
+        file.setSizeType(sizeType);
 
         return this.fileRepository.save(file);
     }
@@ -85,25 +78,6 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public Page<File> getAllByStatus(Pageable pageable, EFileStatus status) {
-        return this.fileRepository.findAllByStatus(pageable, status);
-    }
-
-    @Override
-    public File uploadFile(MultipartFile file, String directory, UUID appointeeID) throws InvalidFileException, IOException {
-        String fileName = handleFileName(Objects.requireNonNull(file.getOriginalFilename()), appointeeID);
-        Path path = Paths.get(directory, fileName);
-        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        String extension = getFileExtension(fileName);
-        assert extension != null;
-        String fileBaseName = fileName.substring(
-                0,
-                fileName.length() - extension.length() - 1
-        );
-        return new File(directory, fileName, extension, fileBaseName);
-    }
-
-    @Override
     public String getFileExtension(String fileName) {
         int dotIndex = fileName.lastIndexOf(".");
         if (dotIndex < 0) {
@@ -113,14 +87,13 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public String handleFileName(String fileName, UUID id)
-            throws InvalidFileException {
+    public String handleFileName(String fileName, UUID id) {
 
         String cleanFileName = fileName.replaceAll("[^A-Za-z0-9.()]", "");
         String extension = getFileExtension(cleanFileName);
 
         if (!isValidExtension(cleanFileName)) {
-            throw new InvalidFileException("Invalid File Extension");
+            throw new BadRequestException("Invalid File Extension");
         }
 
         String base = "image-" + id;
@@ -131,13 +104,11 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public boolean isValidExtension(String fileName)
-            throws InvalidFileException {
+    public boolean isValidExtension(String fileName) {
         String fileExtension = getFileExtension(fileName);
 
-
         if (fileExtension == null) {
-            throw new InvalidFileException("No File Extension");
+            throw new AppException("No File Extension");
         }
 
         fileExtension = fileExtension.toLowerCase();
