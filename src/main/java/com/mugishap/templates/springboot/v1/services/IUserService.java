@@ -3,7 +3,7 @@ package com.mugishap.templates.springboot.v1.services;
 import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
 import com.mugishap.templates.springboot.v1.enums.ERole;
 import com.mugishap.templates.springboot.v1.enums.EUserStatus;
-import com.mugishap.templates.springboot.v1.fileHandling.File;
+import com.mugishap.templates.springboot.v1.models.File;
 import com.mugishap.templates.springboot.v1.models.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,4 +1,4 @@
-package com.mugishap.templates.springboot.v1.security;
+package com.mugishap.templates.springboot.v1.validations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

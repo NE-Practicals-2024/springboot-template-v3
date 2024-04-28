@@ -1,4 +1,4 @@
-package com.mugishap.templates.springboot.v1.fileHandling;
+package com.mugishap.templates.springboot.v1.models;
 
 
 import com.mugishap.templates.springboot.v1.audits.InitiatorAudit;

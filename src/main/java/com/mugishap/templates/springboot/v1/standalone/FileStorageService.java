@@ -1,7 +1,8 @@
-package com.mugishap.templates.springboot.v1.fileHandling;
+package com.mugishap.templates.springboot.v1.standalone;
 
 import com.mugishap.templates.springboot.v1.exceptions.AppException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -23,23 +24,20 @@ public class FileStorageService {
     @Value("${uploads.directory}")
     private String root;
 
+    @Value("${uploads.directory.user_profiles}")
+    private String userProfilesFolder;
+
+    @Value("${uploads.directory.docs}")
+    private String docsFolder;
+
+    @Bean
     public void init() {
         try {
-            Files.createDirectories(Paths.get(root));
+            Files.createDirectories(Paths.get(root, userProfilesFolder, docsFolder));
         } catch (IOException e) {
             throw new AppException(e.getMessage());
         }
     }
-
-
-    public void createSubDirectory(String directory) {
-        try {
-            Files.createDirectories(Paths.get(root + directory));
-        } catch (IOException e) {
-            throw new AppException(e.getMessage());
-        }
-    }
-
 
     public String save(MultipartFile file, String directory, String filename) {
         try {

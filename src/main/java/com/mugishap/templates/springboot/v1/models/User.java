@@ -1,7 +1,6 @@
 package com.mugishap.templates.springboot.v1.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mugishap.templates.springboot.v1.fileHandling.File;
 import com.mugishap.templates.springboot.v1.audits.TimestampAudit;
 import com.mugishap.templates.springboot.v1.enums.EGender;
 import com.mugishap.templates.springboot.v1.enums.EUserStatus;

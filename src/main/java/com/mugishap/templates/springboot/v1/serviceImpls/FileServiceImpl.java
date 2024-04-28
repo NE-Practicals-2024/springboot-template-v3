@@ -1,7 +1,7 @@
 package com.mugishap.templates.springboot.v1.serviceImpls;
 
-import com.mugishap.templates.springboot.v1.fileHandling.File;
-import com.mugishap.templates.springboot.v1.fileHandling.FileStorageService;
+import com.mugishap.templates.springboot.v1.models.File;
+import com.mugishap.templates.springboot.v1.standalone.FileStorageService;
 import com.mugishap.templates.springboot.v1.repositories.IFileRepository;
 import com.mugishap.templates.springboot.v1.enums.EFileSizeType;
 import com.mugishap.templates.springboot.v1.enums.EFileStatus;

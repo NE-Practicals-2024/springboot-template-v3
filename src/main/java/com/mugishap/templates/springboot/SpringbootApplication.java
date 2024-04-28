@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.metrics.ApplicationStartup;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -25,7 +24,7 @@ public class SpringbootApplication {
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(SpringbootApplication.class);
-        app.setLogStartupInfo(false);
+//        app
         SpringApplication.run(SpringbootApplication.class, args);
     }
 

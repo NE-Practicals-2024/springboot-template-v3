@@ -1,4 +1,4 @@
-package com.mugishap.templates.springboot.v1.services;
+package com.mugishap.templates.springboot.v1.standalone;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;

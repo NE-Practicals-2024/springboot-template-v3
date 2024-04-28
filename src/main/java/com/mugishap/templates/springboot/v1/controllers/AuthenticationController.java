@@ -1,6 +1,6 @@
 package com.mugishap.templates.springboot.v1.controllers;
 
-import com.mugishap.templates.springboot.v1.services.MailService;
+import com.mugishap.templates.springboot.v1.standalone.MailService;
 import com.mugishap.templates.springboot.v1.payload.request.InitiatePasswordResetDTO;
 import com.mugishap.templates.springboot.v1.payload.request.ResetPasswordDTO;
 import com.mugishap.templates.springboot.v1.payload.request.LoginDTO;

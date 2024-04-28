@@ -4,7 +4,7 @@ import com.mugishap.templates.springboot.v1.payload.request.CreateUserDTO;
 import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
 import com.mugishap.templates.springboot.v1.enums.ERole;
 import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
-import com.mugishap.templates.springboot.v1.fileHandling.File;
+import com.mugishap.templates.springboot.v1.models.File;
 import com.mugishap.templates.springboot.v1.models.Role;
 import com.mugishap.templates.springboot.v1.models.User;
 import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;

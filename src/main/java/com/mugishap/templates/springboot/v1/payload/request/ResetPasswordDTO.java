@@ -1,6 +1,6 @@
 package com.mugishap.templates.springboot.v1.payload.request;
 
-import com.mugishap.templates.springboot.v1.security.ValidPassword;
+import com.mugishap.templates.springboot.v1.validations.ValidPassword;
 import lombok.Getter;
 
 import jakarta.validation.constraints.NotBlank;

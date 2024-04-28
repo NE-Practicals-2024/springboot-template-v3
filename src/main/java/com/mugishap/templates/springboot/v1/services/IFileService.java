@@ -1,7 +1,7 @@
 package com.mugishap.templates.springboot.v1.services;
 
 import com.mugishap.templates.springboot.v1.exceptions.InvalidFileException;
-import com.mugishap.templates.springboot.v1.fileHandling.File;
+import com.mugishap.templates.springboot.v1.models.File;
 import com.mugishap.templates.springboot.v1.enums.EFileStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
