@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -45,9 +44,8 @@ public class FileStorageService {
         try {
             Path path = Paths.get(directory);
             Files.copy(file.getInputStream(), path.resolve(Objects.requireNonNull(filename)));
-            return path.toString() + "/" + filename;
+            return path + "/" + filename;
         } catch (Exception e) {
-            System.out.println(e);
             throw new AppException(e.getMessage());
         }
     }

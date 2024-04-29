@@ -1,19 +1,20 @@
 package com.mugishap.templates.springboot.v1.controllers;
 
-import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
-import com.mugishap.templates.springboot.v1.standalone.MailService;
-import com.mugishap.templates.springboot.v1.payload.request.InitiatePasswordResetDTO;
-import com.mugishap.templates.springboot.v1.payload.request.ResetPasswordDTO;
-import com.mugishap.templates.springboot.v1.payload.request.LoginDTO;
 import com.mugishap.templates.springboot.v1.enums.EUserStatus;
 import com.mugishap.templates.springboot.v1.exceptions.AppException;
+import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.models.User;
+import com.mugishap.templates.springboot.v1.payload.request.InitiatePasswordResetDTO;
+import com.mugishap.templates.springboot.v1.payload.request.LoginDTO;
+import com.mugishap.templates.springboot.v1.payload.request.ResetPasswordDTO;
 import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;
 import com.mugishap.templates.springboot.v1.payload.response.JwtAuthenticationResponse;
 import com.mugishap.templates.springboot.v1.security.JwtTokenProvider;
 import com.mugishap.templates.springboot.v1.services.IUserService;
+import com.mugishap.templates.springboot.v1.standalone.MailService;
 import com.mugishap.templates.springboot.v1.utils.Utility;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,44 +26,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-
 @RestController
 @RequestMapping(path = "/api/v1/auth")
+@RequiredArgsConstructor
 public class AuthenticationController {
 
     private final IUserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final MailService mailService;
 
-    @Autowired
-    public AuthenticationController(IUserService userService, AuthenticationManager authenticationManager,
-                                    JwtTokenProvider jwtTokenProvider, MailService mailService,
-                                    BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.userService = userService;
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.mailService = mailService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    }
-
-
     @PostMapping(path = "/login")
-    public ResponseEntity<ApiResponse> signin(@Valid @RequestBody LoginDTO dto) {
+    public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginDTO dto) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
-
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         String jwt = null;
-
         try {
             jwt = jwtTokenProvider.generateToken(authentication);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new AppException("Error generating token", e);
         }
         User user = this.userService.getByEmail(dto.getEmail());
         return ResponseEntity.ok(ApiResponse.success("Login successful", new JwtAuthenticationResponse(jwt, user)));
@@ -88,7 +73,7 @@ public class AuthenticationController {
 
         if (Utility.isCodeValid(user.getActivationCode(), dto.getActivationCode()) &&
                 (user.getStatus().equals(EUserStatus.RESET)) || user.getStatus().equals(EUserStatus.PENDING)) {
-            user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
             user.setActivationCode(Utility.randomUUID(6, 0, 'N'));
             user.setStatus(EUserStatus.ACTIVE);
             this.userService.create(user);

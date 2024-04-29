@@ -37,7 +37,7 @@ public class SpringbootApplication {
             if (roleByName.isEmpty()) {
                 Role newRole = new Role(role, role.toString());
                 roleRepository.save(newRole);
-                System.out.println("Created: " + role.toString());
+                System.out.println("Created: " + role);
 
             }
         }

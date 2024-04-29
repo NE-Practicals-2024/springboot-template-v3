@@ -105,6 +105,11 @@
             <artifactId>guava</artifactId>
             <version>30.1-jre</version> <!-- or the latest version available -->
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -2,14 +2,13 @@ package com.mugishap.templates.springboot.v1.security;
 
 import com.mugishap.templates.springboot.v1.models.User;
 import com.mugishap.templates.springboot.v1.repositories.IUserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import jakarta.transaction.Transactional;
 import java.util.UUID;
 
 @Service

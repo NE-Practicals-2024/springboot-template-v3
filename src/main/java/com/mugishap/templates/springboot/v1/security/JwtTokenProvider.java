@@ -3,9 +3,9 @@ package com.mugishap.templates.springboot.v1.security;
 import com.mugishap.templates.springboot.v1.models.User;
 import com.mugishap.templates.springboot.v1.repositories.IUserRepository;
 import io.jsonwebtoken.*;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,11 +17,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Autowired
-    private IUserRepository userRepository;
+    private final IUserRepository userRepository;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -29,21 +29,21 @@ public class JwtTokenProvider {
     @Value("${jwt.expiresIn}")
     private int jwtExpirationInMs;
 
-    public String generateToken(Authentication authentication){
+    public String generateToken(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime()+jwtExpirationInMs);
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
-        for (GrantedAuthority role :userPrincipal.getAuthorities()){
+        for (GrantedAuthority role : userPrincipal.getAuthorities()) {
             grantedAuthorities.add(new SimpleGrantedAuthority(role.getAuthority()));
         }
 
         User authUser = userRepository.findById(userPrincipal.getId()).get();
 
         return Jwts.builder()
-                .setId(authUser.getId()+"")
-                .setSubject(userPrincipal.getId()+"")
+                .setId(authUser.getId() + "")
+                .setSubject(userPrincipal.getId() + "")
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .claim("authorities", grantedAuthorities)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -52,7 +52,7 @@ public class JwtTokenProvider {
     }
 
 
-    public String getUserIdFromToken(String token){
+    public String getUserIdFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
         return claims.getSubject();
     }

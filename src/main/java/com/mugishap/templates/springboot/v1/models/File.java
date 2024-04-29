@@ -7,7 +7,6 @@ import com.mugishap.templates.springboot.v1.enums.EFileSizeType;
 import com.mugishap.templates.springboot.v1.enums.EFileStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
@@ -22,8 +21,7 @@ import java.util.UUID;
 public class File extends InitiatorAudit {
 
     @Id
-    @GeneratedValue(generator = "fileUUID")
-    @GenericGenerator(name = "fileUUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private UUID id;
 
@@ -49,11 +47,6 @@ public class File extends InitiatorAudit {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private EFileStatus status;
-
-    public File(String directory, String fileName, String extension, String fileBaseName) {
-        super();
-    }
-
 
     public String getUrl() {
         return "http://localhost:8086/api/v1/files/load-file" + "/" + this.getName();

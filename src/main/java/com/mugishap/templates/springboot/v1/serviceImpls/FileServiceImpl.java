@@ -1,30 +1,20 @@
 package com.mugishap.templates.springboot.v1.serviceImpls;
 
-import com.mugishap.templates.springboot.v1.exceptions.AppException;
-import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
-import com.mugishap.templates.springboot.v1.models.File;
-import com.mugishap.templates.springboot.v1.standalone.FileStorageService;
-import com.mugishap.templates.springboot.v1.repositories.IFileRepository;
 import com.mugishap.templates.springboot.v1.enums.EFileSizeType;
 import com.mugishap.templates.springboot.v1.enums.EFileStatus;
-import com.mugishap.templates.springboot.v1.exceptions.InvalidFileException;
+import com.mugishap.templates.springboot.v1.exceptions.AppException;
+import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.exceptions.ResourceNotFoundException;
+import com.mugishap.templates.springboot.v1.models.File;
+import com.mugishap.templates.springboot.v1.repositories.IFileRepository;
 import com.mugishap.templates.springboot.v1.services.IFileService;
+import com.mugishap.templates.springboot.v1.standalone.FileStorageService;
 import com.mugishap.templates.springboot.v1.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 

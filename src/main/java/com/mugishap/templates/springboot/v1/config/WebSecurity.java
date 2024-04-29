@@ -3,7 +3,6 @@ package com.mugishap.templates.springboot.v1.config;
 import com.mugishap.templates.springboot.v1.security.CustomUserDetailsService;
 import com.mugishap.templates.springboot.v1.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,29 +28,30 @@ public class WebSecurity {
         return new JwtAuthenticationFilter();
     }
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(request ->
-                request
-                        .requestMatchers(
-                                "/api/v1/files/load-file/**"
-                        ).permitAll()
-                        .requestMatchers(
-                                "/api/v1/auth/**",
-                                "/api/v1/users/**"
-                        ).permitAll()
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-        ).sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
-        ).authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter(),
-                UsernamePasswordAuthenticationFilter.class);
+                        request
+                                .requestMatchers(
+                                        "/api/v1/files/load-file/**"
+                                ).permitAll()
+                                .requestMatchers(
+                                        "/api/v1/auth/**",
+                                        "/api/v1/users/**"
+                                ).permitAll()
+                                .requestMatchers(
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**"
+                                ).permitAll()
+                                .requestMatchers(
+                                        "/actuator/**"
+                                ).permitAll()
+                                .anyRequest().authenticated())
+                .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter(),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

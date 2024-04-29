@@ -16,8 +16,7 @@ import java.util.UUID;
 @Table(name = "roles")
 public class Role {
     @Id
-    @GeneratedValue(generator = "userUUID")
-    @GenericGenerator(name="userUUID", strategy="org.hibernate.id.UUIDGenerator")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="id")
     private UUID id;
 
