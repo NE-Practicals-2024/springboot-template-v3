@@ -2,10 +2,12 @@ package com.mugishap.templates.springboot.v1.models;
 
 
 import com.mugishap.templates.springboot.v1.enums.ERole;
-import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.UUID;
 
 @Getter
