@@ -1,13 +1,14 @@
 package com.mugishap.templates.springboot.v1.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mugishap.templates.springboot.v1.audits.InitiatorAudit;
 import com.mugishap.templates.springboot.v1.enums.EFileSizeType;
 import com.mugishap.templates.springboot.v1.enums.EFileStatus;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
-import jakarta.persistence.*;
 import java.util.UUID;
 
 @Getter
@@ -17,33 +18,35 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "files", uniqueConstraints = {@UniqueConstraint(columnNames = "path")})
+@JsonIgnoreProperties(value = {"path"}, allowGetters = true)
 public class File extends InitiatorAudit {
+
     @Id
     @GeneratedValue(generator = "fileUUID")
     @GenericGenerator(name = "fileUUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name="id")
+    @Column(name = "id")
     private UUID id;
 
-    @Column(name="name")
+    @Column(name = "name")
     private String name;
 
-    @Column(name="path")
+    @Column(name = "path")
     private String path;
 
     @Transient
     private String url;
 
-    @Column(name="size")
+    @Column(name = "size")
     private int size;
 
-    @Column(name="size_type")
+    @Column(name = "size_type")
     @Enumerated(EnumType.STRING)
     private EFileSizeType sizeType;
 
-    @Column(name="type")
+    @Column(name = "type")
     private String type;
 
-    @Column(name="status")
+    @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private EFileStatus status;
 
