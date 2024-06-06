@@ -78,28 +78,6 @@ public class MailService {
         }
     }
 
-    public void sendAccountApprovedEmail(String to, String fullName) {
-        try {
-            MimeMessage message = this.mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-            Context context = new Context();
-            context.setVariable("fullName", fullName);
-            context.setVariable("supportEmail", supportEmail);
-            context.setVariable("currentYear", LocalDate.now().getYear());
-
-            String htmlContent = templateEngine.process("account-approved-email", context);
-
-            helper.setTo(to);
-            helper.setSubject("Account Approval Successful");
-            helper.setText(htmlContent, true);
-
-            this.mailSender.send(message);
-        } catch (MessagingException e) {
-            throw new AppException("Error sending message", e);
-        }
-    }
-
     public void sendAccountVerifiedSuccessfullyEmail(String to, String fullName) {
         try {
             MimeMessage message = this.mailSender.createMimeMessage();
@@ -114,29 +92,6 @@ public class MailService {
 
             helper.setTo(to);
             helper.setSubject("Account Verification Successful");
-            helper.setText(htmlContent, true);
-
-            this.mailSender.send(message);
-        } catch (MessagingException e) {
-            throw new AppException("Error sending message", e);
-        }
-    }
-
-
-    public void sendAccountRejectedEmail(String to, String fullName) {
-        try {
-            MimeMessage message = this.mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-            Context context = new Context();
-            context.setVariable("fullName", fullName);
-            context.setVariable("supportEmail", supportEmail);
-            context.setVariable("currentYear", LocalDate.now().getYear());
-
-            String htmlContent = templateEngine.process("account-rejected-email", context);
-
-            helper.setTo(to);
-            helper.setSubject("Account Rejected");
             helper.setText(htmlContent, true);
 
             this.mailSender.send(message);

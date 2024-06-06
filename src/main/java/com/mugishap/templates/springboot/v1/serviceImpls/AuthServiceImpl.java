@@ -52,22 +52,20 @@ public class AuthServiceImpl implements IAuthService {
         User user = this.userService.getByEmail(email);
         user.setActivationCode(Utility.randomUUID(6, 0, 'N'));
         user.setStatus(EUserStatus.RESET);
-
-        this.userService.create(user);
-
+        this.userService.save(user);
         mailService.sendResetPasswordMail(user.getEmail(), user.getFirstName() + " " + user.getLastName(), user.getActivationCode());
     }
 
     @Override
     public void resetPassword(String email, String passwordResetCode, String newPassword) {
         User user = this.userService.getByEmail(email);
-
         if (Utility.isCodeValid(user.getActivationCode(), passwordResetCode) &&
                 (user.getStatus().equals(EUserStatus.RESET)) || user.getStatus().equals(EUserStatus.PENDING)) {
             user.setPassword(passwordEncoder.encode(newPassword));
             user.setActivationCode(Utility.randomUUID(6, 0, 'N'));
             user.setStatus(EUserStatus.ACTIVE);
-            this.userService.create(user);
+            this.userService.save(user);
+            this.mailService.sendPasswordResetSuccessfully(user.getEmail(), user.getFullName());
         } else {
             throw new BadRequestException("Invalid code or account status");
         }
@@ -94,7 +92,7 @@ public class AuthServiceImpl implements IAuthService {
     public void verifyAccount(String verificationCode) {
         Optional<User> _user = this.userService.findByActivationCode(verificationCode);
         if (_user.isEmpty()) {
-            throw new ResourceNotFoundException("User",verificationCode,verificationCode);
+            throw new ResourceNotFoundException("User", verificationCode, verificationCode);
         }
         User user = _user.get();
         if (user.getActivationCodeExpiresAt().isBefore(LocalDateTime.now())) {
