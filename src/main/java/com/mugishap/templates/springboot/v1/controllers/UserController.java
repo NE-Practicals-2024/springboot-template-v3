@@ -100,7 +100,7 @@ public class UserController {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setGender(dto.getGender());
-        user.setMobile(dto.getMobile());
+        user.setTelephone(dto.getTelephone());
         user.setPassword(encodedPassword);
         user.setRoles(Collections.singleton(role));
 

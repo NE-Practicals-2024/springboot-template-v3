@@ -1,8 +1,11 @@
 package com.mugishap.templates.springboot.v1.utils;
 
 
+import com.mugishap.templates.springboot.v1.models.User;
+import com.sun.tools.jconsole.JConsoleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.security.SecureRandom;
 import java.util.Random;
@@ -61,6 +64,31 @@ public class Utility {
 
     public static boolean isCodeValid(String activationCode, String sentCode) {
         return activationCode.trim().equalsIgnoreCase(sentCode.trim());
+    }
+
+    public static String getConstraintViolationMessage(DataIntegrityViolationException ex, User user) {
+        String message = ex.getMostSpecificCause().getMessage();
+        if (message.contains("email")) {
+            return String.format("User with email '%s' already exists", user.getEmail());
+        } else if (message.contains("telephone")) {
+            return String.format("User with phone number '%s' already exists", user.getTelephone());
+        }
+        // Add more checks for other unique constraints if necessary
+        return "A unique constraint violation occurred";
+    }
+
+    public static String generateAuthCode() {
+        Random random = new Random();
+        StringBuilder resetCode = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            int randomNumber = random.nextInt(10); // 0-9
+            resetCode.append(randomNumber);
+        }
+        for (int i = 0; i < 3; i++) {
+            char randomLetter = (char) ('A' + random.nextInt(26)); // A-Z
+            resetCode.append(randomLetter);
+        }
+        return resetCode.toString();
     }
 
 

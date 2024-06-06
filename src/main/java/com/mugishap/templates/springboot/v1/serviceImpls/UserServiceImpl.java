@@ -11,7 +11,9 @@ import com.mugishap.templates.springboot.v1.models.User;
 import com.mugishap.templates.springboot.v1.repositories.IUserRepository;
 import com.mugishap.templates.springboot.v1.services.IFileService;
 import com.mugishap.templates.springboot.v1.services.IUserService;
+import com.mugishap.templates.springboot.v1.utils.Utility;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,11 +44,25 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User create(User user) {
-        Optional<User> userOptional = this.userRepository.findByEmail(user.getEmail());
-        if (userOptional.isPresent())
-            throw new BadRequestException(String.format("User with email '%s' already exists", user.getEmail()));
+        try {
+            Optional<User> userOptional = this.userRepository.findByEmail(user.getEmail());
+            if (userOptional.isPresent())
+                throw new BadRequestException(String.format("User with email '%s' already exists", user.getEmail()));
+            return this.userRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            String errorMessage = Utility.getConstraintViolationMessage(ex, user);
+            throw new BadRequestException(errorMessage, ex);
+        }
+    }
 
-        return this.userRepository.save(user);
+    @Override
+    public User save(User user) {
+        try {
+            return this.userRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            String errorMessage = Utility.getConstraintViolationMessage(ex, user);
+            throw new BadRequestException(errorMessage, ex);
+        }
     }
 
     @Override
@@ -61,7 +77,7 @@ public class UserServiceImpl implements IUserService {
         entity.setEmail(dto.getEmail());
         entity.setFirstName(dto.getFirstName());
         entity.setLastName(dto.getLastName());
-        entity.setMobile(dto.getMobile());
+        entity.setTelephone(dto.getTelephone());
         entity.setGender(dto.getGender());
 
 
@@ -142,5 +158,10 @@ public class UserServiceImpl implements IUserService {
         }
         user.setProfileImage(null);
         return this.userRepository.save(user);
+    }
+
+    @Override
+    public Optional<User> findByActivationCode(String activationCode) {
+        return this.userRepository.findByActivationCode(activationCode);
     }
 }

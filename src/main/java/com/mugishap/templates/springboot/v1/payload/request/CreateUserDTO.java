@@ -23,7 +23,7 @@ public class CreateUserDTO {
 
     @NotBlank
     @Pattern(regexp = "[0-9]{9,12}", message = "Your phone is not a valid tel we expect 2507***, or 07*** or 7***")
-    private String mobile;
+    private String telephone;
 
     private EGender gender;
 

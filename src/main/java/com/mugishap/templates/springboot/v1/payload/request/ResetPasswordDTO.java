@@ -12,8 +12,8 @@ public class ResetPasswordDTO {
     private String email;
 
     @NotBlank
-    private String activationCode;
+    private String passwordResetCode;
 
     @ValidPassword
-    private String password;
+    private String newPassword;
 }

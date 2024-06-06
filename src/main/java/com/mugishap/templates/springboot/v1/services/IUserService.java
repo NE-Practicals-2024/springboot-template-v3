@@ -8,6 +8,7 @@ import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -18,6 +19,7 @@ public interface IUserService {
     User getById(UUID id);
 
     User create(User user);
+    User save(User user);
 
     User update(UUID id, UpdateUserDTO dto);
 
@@ -36,5 +38,7 @@ public interface IUserService {
     User changeProfileImage(UUID id, File file);
 
     User removeProfileImage(UUID id);
+
+    Optional<User> findByActivationCode(String verificationCode);
 
 }

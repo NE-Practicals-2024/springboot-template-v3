@@ -28,7 +28,7 @@ public class UserPrincipal implements UserDetails {
 
     private String lastName;
 
-    private String mobile;
+    private String telephone;
 
     private EGender gender;
 
@@ -48,7 +48,7 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getMobile(),
+                user.getTelephone(),
                 user.getGender(),
                 user.getPassword(),
                 user.getStatus(),

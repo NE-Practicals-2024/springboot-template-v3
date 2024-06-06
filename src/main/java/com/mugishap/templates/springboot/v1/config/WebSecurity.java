@@ -1,10 +1,15 @@
 package com.mugishap.templates.springboot.v1.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;
 import com.mugishap.templates.springboot.v1.security.CustomUserDetailsService;
 import com.mugishap.templates.springboot.v1.security.JwtAuthenticationFilter;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -15,7 +20,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -39,7 +46,7 @@ public class WebSecurity {
                                 ).permitAll()
                                 .requestMatchers(
                                         "/api/v1/auth/**",
-                                        "/api/v1/users/**"
+                                        "/api/v1/users/create"
                                 ).permitAll()
                                 .requestMatchers(
                                         "/v3/api-docs/**",
@@ -71,8 +78,29 @@ public class WebSecurity {
     }
 
     @Bean
-
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationErrorHandler() {
+        return (request, response, ex) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            ServletOutputStream out = response.getOutputStream();
+            new ObjectMapper().writeValue(out, ApiResponse.error("Invalid or missing auth token."));
+            out.flush();
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, ex) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            ServletOutputStream out = response.getOutputStream();
+            new ObjectMapper().writeValue(out, ApiResponse.error("You are not allowed to access this resource."));
+            out.flush();
+        };
     }
 }

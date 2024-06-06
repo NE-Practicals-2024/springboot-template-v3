@@ -20,6 +20,8 @@ public interface IUserRepository extends JpaRepository<User, UUID> {
 
     Page<User> findByRoles(Pageable pageable, ERole role);
 
+    Optional<User> findByActivationCode(String activationCode);
+
     @Query("SELECT u FROM User u" +
             " WHERE (lower(u.firstName)  LIKE ('%' || lower(:searchKey) || '%')) " +
             " OR (lower(u.lastName) LIKE ('%' || lower(:searchKey) || '%')) " +

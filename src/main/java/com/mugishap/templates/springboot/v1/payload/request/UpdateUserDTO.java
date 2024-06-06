@@ -19,7 +19,7 @@ public class UpdateUserDTO {
     private String lastName;
 
     @Pattern(regexp = "[0-9]{12}")
-    private String mobile;
+    private String telephone;
 
 
     private EGender gender;
