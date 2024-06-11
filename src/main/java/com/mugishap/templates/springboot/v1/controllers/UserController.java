@@ -12,6 +12,7 @@ import com.mugishap.templates.springboot.v1.repositories.IRoleRepository;
 import com.mugishap.templates.springboot.v1.services.IFileService;
 import com.mugishap.templates.springboot.v1.services.IUserService;
 import com.mugishap.templates.springboot.v1.utils.Constants;
+import com.mugishap.templates.springboot.v1.utils.Utility;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +25,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -105,14 +108,17 @@ public class UserController {
         user.setRoles(Collections.singleton(role));
 
         User entity = this.userService.create(user);
-
-        return ResponseEntity.ok(ApiResponse.success("User created successfully", entity));
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().toString());
+        return ResponseEntity.created(uri).body(ApiResponse.success("User created successfully", entity));
     }
 
     @PutMapping(path = "/upload-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse> uploadProfileImage(
             @RequestParam("file") MultipartFile document
     ) {
+        if (!Utility.isImageFile(document)) {
+            throw new BadRequestException("Only image files are allowed");
+        }
         User user = this.userService.getLoggedInUser();
         File file = this.fileService.create(document, userProfilesDirectory);
 

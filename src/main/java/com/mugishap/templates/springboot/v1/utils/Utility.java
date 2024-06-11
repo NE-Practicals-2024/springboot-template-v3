@@ -1,14 +1,16 @@
 package com.mugishap.templates.springboot.v1.utils;
 
 
-import com.mugishap.templates.springboot.v1.models.User;
-import com.sun.tools.jconsole.JConsoleContext;
+import java.security.SecureRandom;
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.security.SecureRandom;
-import java.util.Random;
+import com.mugishap.templates.springboot.v1.models.User;
 
 public class Utility {
     private static final String ALPHANUM = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -61,7 +63,10 @@ public class Utility {
         return sb.toString();
     }
 
-
+    public static boolean isImageFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && (contentType.equals(MediaType.IMAGE_JPEG_VALUE) || contentType.equals(MediaType.IMAGE_PNG_VALUE) || contentType.equals(MediaType.IMAGE_GIF_VALUE));
+    }
     public static boolean isCodeValid(String activationCode, String sentCode) {
         return activationCode.trim().equalsIgnoreCase(sentCode.trim());
     }

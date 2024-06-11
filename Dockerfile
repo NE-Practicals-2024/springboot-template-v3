@@ -20,4 +20,4 @@ COPY --from=builder /app/target/*.jar /app/app.jar
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
 # Expose the port
-EXPOSE 8086
+EXPOSE 8087

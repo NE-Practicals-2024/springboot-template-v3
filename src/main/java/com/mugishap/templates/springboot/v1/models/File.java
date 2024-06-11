@@ -49,7 +49,7 @@ public class File extends InitiatorAudit {
     private EFileStatus status;
 
     public String getUrl() {
-        return "http://localhost:8086/api/v1/files/load-file" + "/" + this.getName();
+        return "http://localhost:8087/api/v1/files/load-file" + "/" + this.getName();
     }
 }
 

@@ -3,6 +3,7 @@ package com.mugishap.templates.springboot.v1.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;
 import com.mugishap.templates.springboot.v1.security.CustomUserDetailsService;
+import com.mugishap.templates.springboot.v1.security.JwtAuthenticationEntryPoint;
 import com.mugishap.templates.springboot.v1.security.JwtAuthenticationFilter;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,7 +35,7 @@ public class WebSecurity {
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
     }
-
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomUserDetailsService userDetailsService;
 
     @Bean
@@ -46,7 +47,7 @@ public class WebSecurity {
                                 ).permitAll()
                                 .requestMatchers(
                                         "/api/v1/auth/**",
-                                        "/api/v1/users/create"
+                                        "/api/v1/users/register"
                                 ).permitAll()
                                 .requestMatchers(
                                         "/v3/api-docs/**",
@@ -59,7 +60,7 @@ public class WebSecurity {
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter(),
                         UsernamePasswordAuthenticationFilter.class);
-
+        http.exceptionHandling((exceptions) -> exceptions.authenticationEntryPoint(authenticationEntryPoint));
         return http.build();
     }
 
