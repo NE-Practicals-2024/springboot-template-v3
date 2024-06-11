@@ -1,29 +1,23 @@
 package com.mugishap.templates.springboot.v1.controllers;
 
-import com.mugishap.templates.springboot.v1.enums.EUserStatus;
-import com.mugishap.templates.springboot.v1.exceptions.AppException;
-import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
-import com.mugishap.templates.springboot.v1.models.User;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.mugishap.templates.springboot.v1.payload.request.InitiateAccountVerificationDTO;
 import com.mugishap.templates.springboot.v1.payload.request.InitiatePasswordResetDTO;
 import com.mugishap.templates.springboot.v1.payload.request.LoginDTO;
 import com.mugishap.templates.springboot.v1.payload.request.ResetPasswordDTO;
 import com.mugishap.templates.springboot.v1.payload.response.ApiResponse;
-import com.mugishap.templates.springboot.v1.payload.response.JwtAuthenticationResponse;
-import com.mugishap.templates.springboot.v1.security.JwtTokenProvider;
 import com.mugishap.templates.springboot.v1.services.IAuthService;
-import com.mugishap.templates.springboot.v1.services.IUserService;
-import com.mugishap.templates.springboot.v1.standalone.MailService;
-import com.mugishap.templates.springboot.v1.utils.Utility;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api/v1/auth")
