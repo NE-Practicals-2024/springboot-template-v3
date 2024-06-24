@@ -57,22 +57,22 @@ public class UserController {
     }
 
     @GetMapping(path = "/all")
-    public Page<User> getAllUsers(
+    public ResponseEntity<ApiResponse> getAllUsers(
             @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit
     ) {
         Pageable pageable = (Pageable) PageRequest.of(page, limit, Sort.Direction.ASC, "id");
-        return userService.getAll(pageable);
+        return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", userService.getAll(pageable)));
     }
 
     @GetMapping(path = "/all/{role}")
-    public Page<User> getAllUsersByRole(
+    public ResponseEntity<ApiResponse> getAllUsersByRole(
             @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit,
             @PathVariable(value = "role") ERole role
     ) {
         Pageable pageable = (Pageable) PageRequest.of(page, limit, Sort.Direction.ASC, "id");
-        return userService.getAllByRole(pageable, role);
+        return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", userService.getAllByRole(pageable, role)));
     }
 
     @GetMapping(path = "/search")
@@ -86,8 +86,8 @@ public class UserController {
     }
 
     @GetMapping(path = "/{id}")
-    public ResponseEntity<User> getById(@PathVariable(value = "id") UUID id) {
-        return ResponseEntity.ok(this.userService.getById(id));
+    public ResponseEntity<ApiResponse> getById(@PathVariable(value = "id") UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("User fetched successfully", this.userService.getById(id)));
     }
 
     @PostMapping(path = "/register")
