@@ -80,7 +80,6 @@ public class UserServiceImpl implements IUserService {
         entity.setTelephone(dto.getTelephone());
         entity.setGender(dto.getGender());
 
-
         return this.userRepository.save(entity);
     }
 
