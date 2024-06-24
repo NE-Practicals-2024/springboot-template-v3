@@ -1,25 +1,37 @@
 package com.mugishap.templates.springboot.v1.serviceImpls;
 
-import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
 import com.mugishap.templates.springboot.v1.enums.ERole;
 import com.mugishap.templates.springboot.v1.enums.EUserStatus;
 import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.exceptions.ResourceNotFoundException;
 import com.mugishap.templates.springboot.v1.models.File;
-import com.mugishap.templates.springboot.v1.standalone.FileStorageService;
+import com.mugishap.templates.springboot.v1.models.Role;
 import com.mugishap.templates.springboot.v1.models.User;
+import com.mugishap.templates.springboot.v1.payload.request.UpdateUserDTO;
+import com.mugishap.templates.springboot.v1.repositories.IRoleRepository;
 import com.mugishap.templates.springboot.v1.repositories.IUserRepository;
 import com.mugishap.templates.springboot.v1.services.IFileService;
 import com.mugishap.templates.springboot.v1.services.IUserService;
+import com.mugishap.templates.springboot.v1.standalone.FileStorageService;
 import com.mugishap.templates.springboot.v1.utils.Utility;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,16 +42,60 @@ public class UserServiceImpl implements IUserService {
     private final IUserRepository userRepository;
     private final IFileService fileService;
     private final FileStorageService fileStorageService;
+    private final EntityManager em;
+    private final IRoleRepository roleRepository;
+
 
     @Override
-    public Page<User> getAll(Pageable pageable) {
-        return this.userRepository.findAll(pageable);
+    public Page<User> getAll(Pageable pageable, ERole role, String searchKey, EUserStatus status) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+
+        // Query for reserved names
+        CriteriaQuery<User> cr = cb.createQuery(User.class);
+        Root<User> root = cr.from(User.class);
+
+        // Query for count
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<User> countRoot = countQuery.from(User.class);
+        countQuery.select(cb.count(countRoot));
+
+        // List to hold predicates
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (searchKey != null && !searchKey.isEmpty()) {
+            String searchPattern = "%" + searchKey.toLowerCase() + "%";
+            Predicate namePredicate = cb.like(cb.lower(root.get("name")), searchPattern);
+            predicates.add(namePredicate);
+        }
+
+        if (role != null) {
+            // Roles are stored in the database as a set of entity Role
+            Role roleEntity = roleRepository.findByName(role).orElseThrow(() -> new BadRequestException("User Role not set"));
+            Predicate rolePredicate = cb.isMember(roleEntity, root.get("roles"));
+            predicates.add(rolePredicate);
+        }
+
+        // Apply predicates to queries
+        if (!predicates.isEmpty()) {
+            Predicate combinedPredicate = cb.and(predicates.toArray(new Predicate[0]));
+            cr.where(combinedPredicate);
+            countQuery.where(combinedPredicate);
+        }
+
+        // Pagination
+        TypedQuery<User> query = em.createQuery(cr);
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        List<User> resultList = query.getResultList();
+        Long count = em.createQuery(countQuery).getSingleResult();
+
+        return new PageImpl<>(resultList, PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()), count);
     }
 
     @Override
     public User getById(UUID id) {
-        return this.userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("User", "id", id.toString()));
+        return this.userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id.toString()));
     }
 
     @Override
@@ -56,9 +112,9 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public User save(User user) {
+    public void save(User user) {
         try {
-            return this.userRepository.save(user);
+            this.userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
             String errorMessage = Utility.getConstraintViolationMessage(ex, user);
             throw new BadRequestException(errorMessage, ex);
@@ -67,8 +123,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User update(UUID id, UpdateUserDTO dto) {
-        User entity = this.userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("User", "id", id.toString()));
+        User entity = this.userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id.toString()));
 
         Optional<User> userOptional = this.userRepository.findByEmail(dto.getEmail());
         if (userOptional.isPresent() && (userOptional.get().getId() != entity.getId()))
@@ -84,22 +139,10 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public boolean delete(UUID id) {
-        this.userRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("User", "id", id));
+    public void delete(UUID id) {
+        this.userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         this.userRepository.deleteById(id);
-        return true;
-    }
-
-    @Override
-    public Page<User> getAllByRole(Pageable pageable, ERole role) {
-        return this.userRepository.findByRoles(pageable, role);
-    }
-
-    @Override
-    public Page<User> searchUser(Pageable pageable, String searchKey) {
-        return this.userRepository.searchUser(pageable, searchKey);
     }
 
     @Override
@@ -113,21 +156,18 @@ public class UserServiceImpl implements IUserService {
             email = principal.toString();
         }
 
-        return userRepository.findByEmail(email).orElseThrow(
-                () -> new ResourceNotFoundException("User", "id", email));
+        return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "id", email));
     }
 
     @Override
     public User getByEmail(String email) {
-        return this.userRepository.findByEmail(email).orElseThrow(
-                () -> new ResourceNotFoundException("User", "id", email));
+        return this.userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "id", email));
     }
 
 
     @Override
     public User changeStatus(UUID id, EUserStatus status) {
-        User entity = this.userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("User", "id", id.toString()));
+        User entity = this.userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id.toString()));
 
         entity.setStatus(status);
 
@@ -136,8 +176,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User changeProfileImage(UUID id, File file) {
-        User entity = this.userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Document", "id", id.toString()));
+        User entity = this.userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Document", "id", id.toString()));
         File existingFile = entity.getProfileImage();
         if (existingFile != null) {
             this.fileStorageService.removeFileOnDisk(existingFile.getPath());
@@ -149,8 +188,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User removeProfileImage(UUID id) {
-        User user = this.userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("User", "id", id.toString()));
+        User user = this.userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id.toString()));
         File file = user.getProfileImage();
         if (file != null) {
             this.fileService.delete(file.getId());

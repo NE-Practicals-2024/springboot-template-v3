@@ -1,6 +1,7 @@
 package com.mugishap.templates.springboot.v1.controllers;
 
 import com.mugishap.templates.springboot.v1.enums.ERole;
+import com.mugishap.templates.springboot.v1.enums.EUserStatus;
 import com.mugishap.templates.springboot.v1.exceptions.BadRequestException;
 import com.mugishap.templates.springboot.v1.models.File;
 import com.mugishap.templates.springboot.v1.models.Role;
@@ -13,13 +14,12 @@ import com.mugishap.templates.springboot.v1.services.IFileService;
 import com.mugishap.templates.springboot.v1.services.IUserService;
 import com.mugishap.templates.springboot.v1.utils.Constants;
 import com.mugishap.templates.springboot.v1.utils.Utility;
+import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,6 +37,8 @@ import java.util.UUID;
 public class UserController {
 
     private final IUserService userService;
+    private final EntityManager em;
+
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private final IRoleRepository roleRepository;
@@ -57,37 +59,20 @@ public class UserController {
     }
 
     @GetMapping(path = "/all")
-    public Page<User> getAllUsers(
-            @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit
-    ) {
-        Pageable pageable = (Pageable) PageRequest.of(page, limit, Sort.Direction.ASC, "id");
-        return userService.getAll(pageable);
-    }
-
-    @GetMapping(path = "/all/{role}")
-    public Page<User> getAllUsersByRole(
+    public ResponseEntity<ApiResponse> getAllUsers(
             @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit,
-            @PathVariable(value = "role") ERole role
+            @RequestParam(value = "role", required = false) ERole role,
+            @RequestParam(value = "searchKey", required = false) String searchKey,
+            @RequestParam(value = "status", required = false) EUserStatus status
     ) {
-        Pageable pageable = (Pageable) PageRequest.of(page, limit, Sort.Direction.ASC, "id");
-        return userService.getAllByRole(pageable, role);
-    }
-
-    @GetMapping(path = "/search")
-    public Page<User> searchUsers(
-            @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(value = "size", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit,
-            @RequestParam(value = "searchKey") String searchKey
-    ) {
-        Pageable pageable = (Pageable) PageRequest.of(page, limit, Sort.Direction.ASC, "id");
-        return userService.searchUser(pageable, searchKey);
+        Pageable pageable = Pageable.ofSize(limit).withPage(page);
+        return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", this.userService.getAll(pageable, role, searchKey, status)));
     }
 
     @GetMapping(path = "/{id}")
-    public ResponseEntity<User> getById(@PathVariable(value = "id") UUID id) {
-        return ResponseEntity.ok(this.userService.getById(id));
+    public ResponseEntity<ApiResponse> getById(@PathVariable(value = "id") UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("User fetched successfully", this.userService.getById(id)));
     }
 
     @PostMapping(path = "/register")
@@ -133,6 +118,15 @@ public class UserController {
         User user = this.userService.getLoggedInUser();
         User updated = this.userService.removeProfileImage(user.getId());
         return ResponseEntity.ok(ApiResponse.success("Profile image removed successfully", updated));
+    }
+
+    @PatchMapping(path = "/change-status")
+    public ResponseEntity<ApiResponse> changeStatus(
+            @RequestParam(value = "id") UUID id,
+            @RequestParam(value = "status") EUserStatus status
+    ) {
+        User updated = this.userService.changeStatus(id, status);
+        return ResponseEntity.ok(ApiResponse.success("User status changed successfully", updated));
     }
 
     @DeleteMapping("/delete")

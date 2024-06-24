@@ -22,9 +22,4 @@ public interface IUserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByActivationCode(String activationCode);
 
-    @Query("SELECT u FROM User u" +
-            " WHERE (lower(u.firstName)  LIKE ('%' || lower(:searchKey) || '%')) " +
-            " OR (lower(u.lastName) LIKE ('%' || lower(:searchKey) || '%')) " +
-            " OR (lower(u.email) LIKE ('%' || lower(:searchKey) || '%'))")
-    Page<User> searchUser(Pageable pageable, String searchKey);
 }

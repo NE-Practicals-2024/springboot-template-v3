@@ -14,20 +14,16 @@ import java.util.UUID;
 
 public interface IUserService {
 
-    Page<User> getAll(Pageable pageable);
+    Page<User> getAll(Pageable pageable,ERole role, String searchKey, EUserStatus status);
 
     User getById(UUID id);
 
     User create(User user);
-    User save(User user);
+    void save(User user);
 
     User update(UUID id, UpdateUserDTO dto);
 
-    boolean delete(UUID id);
-
-    Page<User> getAllByRole(Pageable pageable, ERole role);
-
-    Page<User> searchUser(Pageable pageable, String searchKey);
+    void delete(UUID id);
 
     User getLoggedInUser();
 
