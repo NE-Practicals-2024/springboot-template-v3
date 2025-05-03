@@ -35,6 +35,7 @@ public class WebSecurity {
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
     }
+
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomUserDetailsService userDetailsService;
 
@@ -51,7 +52,10 @@ public class WebSecurity {
                                 ).permitAll()
                                 .requestMatchers(
                                         "/v3/api-docs/**",
-                                        "/swagger-ui/**"
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-resources/**",
+                                        "/webjars/**"
                                 ).permitAll()
                                 .requestMatchers(
                                         "/actuator/**"

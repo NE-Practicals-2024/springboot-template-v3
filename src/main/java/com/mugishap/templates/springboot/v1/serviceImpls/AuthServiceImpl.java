@@ -34,8 +34,7 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public JwtAuthenticationResponse login(String email, String password) {
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = null;
         try {
